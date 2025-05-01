@@ -1,0 +1,91 @@
+- name: Enable certificates and configure services
+  hosts: physical
+  become: true
+  tasks:
+    - name: Download vault-certificates script from my github
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/scripts/vault-certificates
+        dest: /usr/local/bin/vault-certificates
+        mode: 0555
+    - name: Download my vault-certificate systemd timer from github
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/units/vault-certificate%40.timer
+        dest: /etc/systemd/system/vault-certificate@.timer
+        mode: 0555
+    - name: Download my vault-certificate systemd service from github
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/units/vault-certificate%40.service
+        dest: /etc/systemd/system/vault-certificate@.service
+        mode: 0555
+    - name: Download vault-tokens script from my github
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/scripts/vault-tokens
+        dest: /usr/local/bin/vault-tokens
+        mode: 0555
+    - name: Download my vault-tokens systemd timer from github
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/units/vault-token%40.timer
+        dest: /etc/systemd/system/vault-token@.timer
+        mode: 0555
+    - name: Download my vault-token systemd service from github
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/units/vault-token%40.service
+        dest: /etc/systemd/system/vault-token@.service
+        mode: 0555
+    - name: Download my seal check script
+      when: inventory_hostname_short != 'hostpi'
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/scripts/vault-seal-check
+        dest: /usr/local/bin/vault-seal-check
+        mode: 0555
+    - name: Download my seal check service
+      when: inventory_hostname_short != 'hostpi'
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/units/vault-seal-check.service
+        dest: /etc/systemd/system/vault-seal-check.service
+        mode: 0555
+    - name: Download vault ca script
+      when: inventory_hostname_short != 'hostpi'
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/scripts/vault-ca-certs
+        dest: /usr/local/bin/vault-ca-certs
+        mode: 0555
+    - name: Download vault ldap login script
+      when: inventory_hostname_short != 'hostpi'
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/scripts/vault-ldap-login
+        dest: /usr/local/bin/vault-ldap-login
+        mode: 0555
+    - name: Download vault ldap login unit
+      when: inventory_hostname_short != 'hostpi'
+      get_url:
+        url: https://github.com/moretiles/vault-scripts/raw/refs/heads/master/units/vault-ldap-login-host.service
+        dest: /etc/systemd/system/vault-ldap-login-host.service
+        mode: 0555
+    - name: Enable vault target
+      when: inventory_hostname_short != 'hostpi'
+      systemd_service:
+        daemon_reload: true
+        name: vault.target
+        enabled: true
+    - name: Enable vault seal check
+      when: inventory_hostname_short != 'hostpi'
+      systemd_service:
+        daemon_reload: true
+        name: vault-seal-check.service
+        enabled: true
+    - name: Enable vault ldap login
+      when: inventory_hostname_short != 'hostpi'
+      systemd_service:
+        daemon_reload: true
+        name: vault-ldap-login-host.service
+        enabled: true
+    - name: Update APT
+      apt: update_cache=yes
+    - name: Install jq and curl
+      apt:
+        name: 
+          - bash
+          - jq
+          - curl
+        state: present

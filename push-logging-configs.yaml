@@ -1,0 +1,32 @@
+- name: Push logging configs
+  hosts: physical
+  become: true
+  tasks:
+    - name: Create node_exporter dir
+      file:
+        path: /etc/node_exporter
+        state: directory
+        mode: 0774
+        owner: prometheus
+        group: prometheus
+    - name: Copy node_exporter config
+      copy:
+        src: "../dock/node_exporter/node_exporter_{{ inventory_hostname_short }}.yml"
+        dest: /etc/node_exporter/node_exporter.yml
+        mode: 0600
+        owner: prometheus
+        group: prometheus
+    - name: Create fluent-bit dir
+      file:
+        path: /etc/fluent-bit
+        state: directory
+        mode: 0775
+        owner: fluent-bit
+        group: fluent-bit
+    - name: Copy fluent-bit config
+      copy:
+        src: "../dock/fluent-bit/fluent-bit_{{ inventory_hostname_short }}.conf"
+        dest: /etc/fluent-bit/fluent-bit.conf
+        mode: 0640
+        owner: root
+        group: fluent-bit

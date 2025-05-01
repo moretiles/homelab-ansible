@@ -1,0 +1,10 @@
+- name: Setup basic logging
+  hosts: physical
+  become: true
+  tasks:
+    - name: Update APT
+      apt: update_cache=yes
+    - name: Install syslog-ng # must do for auth attempts to be logged
+      apt:
+        name: syslog-ng
+        state: present

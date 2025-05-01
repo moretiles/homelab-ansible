@@ -1,0 +1,57 @@
+- name: Install node exporter
+  hosts: physical
+  become: true
+  tasks:
+    - name: Update APT
+      apt: update_cache=yes
+    - name: Install prometheus node exporter
+      apt:
+        name: prometheus-node-exporter
+        state: present
+    - name: Set node-exporter to use web_config
+      lineinfile:
+        path: /etc/default/prometheus-node-exporter
+        regexp: '^ARGS='
+        line: 'ARGS="--web.config.file /etc/node_exporter/node_exporter.yml"'
+- name: Install fluent-bit
+  hosts: physical
+  become: true
+  tasks:
+    - name: Trust fluent-bit key
+      ansible.builtin.apt_key:
+        url: https://packages.fluentbit.io/fluentbit.key
+        state: present
+    - name: Add fluent-bit key x86_64
+      when: ansible_architecture == 'x86_64'
+      ansible.builtin.apt_repository:
+        repo: "deb https://packages.fluentbit.io/debian/bookworm bookworm main"
+        state: present
+    - name: Add fluent-bit key arm (raspberry pi)
+      when: ansible_architecture == 'aarch64'
+      ansible.builtin.apt_repository:
+        repo: "deb https://packages.fluentbit.io/raspbian/bookworm bookworm main"
+        state: present
+    - name: Update APT
+      apt: update_cache=yes
+    - name: Install fluent-bit
+      apt:
+        name: fluent-bit
+    - name: Create fluent-bit group
+      group:
+        name: fluent-bit
+    - name: Create fluent-bit user
+      user:
+        name: fluent-bit
+        group: fluent-bit
+        #adm group is, at least on debian, a group just for administrative log monitoring
+        groups:
+          - adm
+        shell: /usr/bin/false
+        system: true
+#- name: Enable certificates and configure services
+#  hosts: physical
+#  become: true
+#  tasks:
+#    - name: Activate systemd unit for prometheus
+#      systemd:
+#        activate: vault-certificate@prometheus-node-exporter.service

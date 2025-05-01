@@ -1,0 +1,22 @@
+debian:
+  hosts:
+    hostpi.home.arpa:
+      ansible_user: debian
+      ansible_ssh_private_key_file: ../pi/ed25519
+    oa.home.arpa:
+      ansible_user: ruser
+      ansible_ssh_private_key_file: ../oa/ed25519
+    ob.home.arpa:
+      ansible_user: ruser
+      ansible_ssh_private_key_file: ../ob/ed25519
+physical:
+  hosts:
+    hostpi.home.arpa:
+      ansible_user: debian
+      ansible_ssh_private_key_file: ../pi/ed25519
+    oa.home.arpa:
+      ansible_user: ruser
+      ansible_ssh_private_key_file: ../oa/ed25519
+    ob.home.arpa:
+      ansible_user: ruser
+      ansible_ssh_private_key_file: ../ob/ed25519
